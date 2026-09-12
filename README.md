@@ -1,6 +1,6 @@
 # 🌌 AetherScribe AI — Spatial Air-Drawing Studio
 
-[![Netlify](https://img.shields.io/badge/Hosted%20on-Netlify-00C7B7?style=flat&logo=netlify&logoColor=white)](https://app.netlify.com)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-lohitwrite.netlify.app-00f0ff?style=for-the-badge&logo=netlify&logoColor=white)](https://lohitwrite.netlify.app/)
 [![Vite](https://img.shields.io/badge/Vite-6.4-646CFF?style=flat&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![MediaPipe](https://img.shields.io/badge/MediaPipe-Hands%2060FPS-00f0ff?style=flat)](https://developers.google.com/mediapipe)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
@@ -9,26 +9,11 @@
 
 ---
 
-## 🚀 Netlify File Upload (Instant Deploy)
+## 🌐 Live Website on Netlify
 
-Upload your pre-built site files directly to Netlify without needing Git:
+Click the link below to experience AetherScribe AI live directly in your browser:
 
-### 📦 **[https://app.netlify.com/drop](https://app.netlify.com/drop)**
-
-#### How to Upload Your Files:
-1. Click the link above to open **[Netlify Drop](https://app.netlify.com/drop)** in your browser.
-2. Drag and drop the **`frontend/dist`** folder located at:
-   ```
-   c:\Users\lohit\Videos\websites\ai writing\frontend\dist
-   ```
-   directly into the dashed upload area on Netlify.
-3. Netlify will immediately upload your files and generate your live website link!
-
----
-
-## 🔗 Other Netlify Links
-- **Netlify Dashboard**: [https://app.netlify.com](https://app.netlify.com)
-- **Netlify One-Click Deploy**: [https://app.netlify.com/start/deploy](https://app.netlify.com/start/deploy)
+### 🚀 **[https://lohitwrite.netlify.app/](https://lohitwrite.netlify.app/)**
 
 ---
 
