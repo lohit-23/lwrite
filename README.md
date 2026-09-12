@@ -9,17 +9,26 @@
 
 ---
 
-## 🚀 Netlify App Direct Links
+## 🚀 Netlify File Upload (Instant Deploy)
 
-Access the Netlify App directly to host, deploy, and manage this website:
+Upload your pre-built site files directly to Netlify without needing Git:
 
-- 🔗 **Netlify App Dashboard**: [https://app.netlify.com](https://app.netlify.com)
-- 🚀 **Netlify One-Click Deploy**: [https://app.netlify.com/start/deploy](https://app.netlify.com/start/deploy)
-- 📦 **Netlify Instant Drop (No-Git Deploy)**: [https://app.netlify.com/drop](https://app.netlify.com/drop)
+### 📦 **[https://app.netlify.com/drop](https://app.netlify.com/drop)**
 
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy)
+#### How to Upload Your Files:
+1. Click the link above to open **[Netlify Drop](https://app.netlify.com/drop)** in your browser.
+2. Drag and drop the **`frontend/dist`** folder located at:
+   ```
+   c:\Users\lohit\Videos\websites\ai writing\frontend\dist
+   ```
+   directly into the dashed upload area on Netlify.
+3. Netlify will immediately upload your files and generate your live website link!
 
-> **Note**: After deploying on Netlify App, Netlify will generate your website's live public link (e.g., `https://your-site-name.netlify.app`). You can customize the name anytime under **Site configuration** $\to$ **Change site name**.
+---
+
+## 🔗 Other Netlify Links
+- **Netlify Dashboard**: [https://app.netlify.com](https://app.netlify.com)
+- **Netlify One-Click Deploy**: [https://app.netlify.com/start/deploy](https://app.netlify.com/start/deploy)
 
 ---
 
