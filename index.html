@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AetherScribe AI — Spatial Air-Drawing & Neural Co-Writer Studio</title>
+  <meta name="description" content="Draw in the air on your full webcam feed with 60 FPS hand tracking, glowing neon strokes, real-time AI co-writing, and live left transcription.">
+  <meta name="keywords" content="air drawing, webcam drawing, hand tracking, mediapipe, neon drawing, neural co-writer, spatial canvas">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Orbitron:wght@600;800;900&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- MediaPipe Hands & Camera Utils -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+  
+  <script type="module" crossorigin src="/assets/index-Y3ySmn0h.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-qFrEcjKv.css">
+</head>
+<body class="cyber-theme">
+  <!-- FULLSCREEN WEBCAM FEED -->
+  <div class="webcam-viewport">
+    <video id="webcamVideo" class="fullscreen-webcam" autoplay playsinline muted></video>
+    <div class="webcam-vignette"></div>
+  </div>
+
+  <!-- Ambient Cyber Grid Overlay -->
+  <div class="cyber-ambient-grid" id="ambientGrid"></div>
+
+  <!-- TOP-PINNED COLOR & BRUSH STATION -->
+  <header class="top-station" id="topStation">
+    <!-- Brand Capsule -->
+    <div class="brand-badge" title="AetherScribe AI Spatial Studio">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+          <path d="M2 17l10 5 10-5"></path>
+          <path d="M2 12l10 5 10-5"></path>
+        </svg>
+      </div>
+      <span class="brand-title">AETHERSCRIBE</span>
+    </div>
+
+    <!-- Divider -->
+    <div class="dock-divider"></div>
+
+    <!-- CAMERA ON / CAMERA OFF TOGGLE -->
+    <button class="pill-btn cam-toggle-btn active" id="toggleCamBtn" title="Toggle Camera On / Off">
+      <span class="cam-indicator-dot" id="camDot"></span>
+      <span class="btn-text" id="toggleCamText">CAMERA ON</span>
+    </button>
+
+    <!-- Divider -->
+    <div class="dock-divider"></div>
+
+    <!-- TOP COLORS DOCK (User Requirement: Colors at top) -->
+    <div class="palette-container" id="paletteContainer" title="Select Neon Color"></div>
+
+    <!-- Custom Color Picker -->
+    <div class="color-picker-wrapper" title="Custom Spectrum">
+      <input type="color" id="customColorInput" value="#00f0ff" class="custom-color-input" aria-label="Custom Color">
+      <div class="custom-color-preview" id="customColorPreview"></div>
+    </div>
+
+    <!-- Divider -->
+    <div class="dock-divider"></div>
+
+    <!-- BRUSH CONTROLS -->
+    <div class="brush-controls-wrapper">
+      <div class="brush-styles" id="brushStylesContainer"></div>
+
+      <div class="size-slider-box" title="Brush Size (Thickness)">
+        <span class="slider-label">SZ</span>
+        <input type="range" id="brushSizeSlider" min="2" max="42" value="8" class="cyber-slider">
+        <span class="size-val" id="brushSizeVal">8px</span>
+      </div>
+    </div>
+
+    <!-- Divider -->
+    <div class="dock-divider"></div>
+
+    <!-- AI & QUICK ACTIONS -->
+    <div class="top-actions-dock">
+      <button class="pill-btn active compact-btn" id="toggleAiTwinBtn" title="AI Twin: Celestial pen writes along with user">
+        <span class="btn-icon">✦</span>
+        <span class="btn-text">TWIN</span>
+      </button>
+
+      <button class="pill-btn compact-btn" id="toggleShapeSnapBtn" title="Shape Snap: Refines rough circles/squares">
+        <span class="btn-icon">⬡</span>
+        <span class="btn-text">SNAP</span>
+      </button>
+
+      <button class="pill-btn compact-btn" id="toggleZenBtn" title="Full View Mode: Hide UI panels for complete access across webcam (Hotkey: Z)">
+        <span class="btn-icon">⛶</span>
+        <span class="btn-text">FULL VIEW</span>
+      </button>
+
+      <div class="action-btn-group">
+        <button class="icon-btn" id="undoBtn" title="Undo Stroke (Ctrl+Z)">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13"></path></svg>
+        </button>
+        <button class="icon-btn" id="redoBtn" title="Redo Stroke (Ctrl+Y)">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 7v6h-6"></path><path d="M3 17a9 9 0 019-9 9 9 0 016 2.3l3 2.7"></path></svg>
+        </button>
+      </div>
+
+      <button class="pill-btn danger-hover compact-btn" id="clearCanvasBtn" title="Clear All Strokes">
+        <span class="btn-icon">✕</span>
+        <span class="btn-text">CLEAR</span>
+      </button>
+
+      <div class="action-btn-group">
+        <button class="pill-btn glow-accent compact-btn" id="aiInspectBtn" title="AI Vision: Analyze drawing">
+          <span class="btn-icon">👁</span>
+          <span class="btn-text">VISION</span>
+        </button>
+        <button class="icon-btn" id="saveCanvasBtn" title="Download Screenshot">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        </button>
+        <button class="icon-btn" id="galleryBtn" title="Gallery Archives">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+        </button>
+        <button class="icon-btn active" id="toggleAudioBtn" title="Toggle Synth Sound">
+          <svg class="audio-on-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+          <svg class="audio-off-icon hidden" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="1" y1="1" x2="23" y2="23"></line><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4l-6 4H4v6h4"></path></svg>
+        </button>
+        <button class="icon-btn" id="helpGuideBtn" title="Gesture Handbook">
+          <span style="font-weight: 800; font-size: 13px;">?</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CANVAS STACK -->
+  <main class="canvas-viewport" id="canvasViewport">
+    <canvas id="paintCanvas" class="spatial-canvas"></canvas>
+    <canvas id="particleCanvas" class="spatial-canvas particle-layer"></canvas>
+    <canvas id="cursorHudCanvas" class="spatial-canvas hud-layer"></canvas>
+
+  </main>
+
+  <!-- TELEMETRY HUD (Top-Left) -->
+  <div class="telemetry-hud top-left">
+    <div class="hud-pill" id="gestureStatusPill">
+      <div class="gesture-icon-box" id="gestureIcon">🖐️</div>
+      <div class="gesture-details">
+        <span class="gesture-label">GESTURE STATE</span>
+        <span class="gesture-name" id="gestureName">CONNECTING CAMERA...</span>
+      </div>
+    </div>
+
+    <div class="hud-telemetry-row">
+      <div class="hud-stat">
+        <span class="stat-label">FPS</span>
+        <span class="stat-val" id="hudFps">60</span>
+      </div>
+      <div class="hud-stat">
+        <span class="stat-label">COORDS</span>
+        <span class="stat-val" id="hudCoords">X: 0 Y: 0</span>
+      </div>
+      <div class="hud-stat">
+        <span class="stat-label">STATUS</span>
+        <span class="stat-val" id="sensorStatus" style="color: var(--neon-cyan);">INITIALIZING...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEFT LIVE AIR-WRITING DISPLAY (Visually displays whatever user writes in the air) -->
+  <aside class="left-writing-panel" id="leftWritingPanel" aria-label="Live Air-Writing Display">
+    <div class="panel-header">
+      <div class="panel-title-box">
+        <span class="live-pulse-dot"></span>
+        <span class="panel-title-text">AIR WRITING DISPLAY</span>
+      </div>
+      <div class="panel-header-right">
+        <span class="left-active-style-badge" id="leftActiveStyleBadge">⚡ LASER</span>
+        <span class="live-badge" id="liveWritingBadge">READY</span>
+        <button class="panel-min-btn" id="minLeftPanelBtn" title="Minimize / Expand">_</button>
+      </div>
+    </div>
+
+    <div class="panel-body" id="leftPanelBody">
+      <!-- High-Definition Visual Air-Writing Pad -->
+      <div class="ink-mirror-card" id="inkMirrorCard">
+        <div class="ink-mirror-header">
+          <span class="ink-mirror-label">LIVE STREAM</span>
+          <div class="bg-mode-switcher" id="bgModeSwitcher" title="Choose background for writing display">
+            <button type="button" class="bg-mode-btn active" id="bgBlackBtn" title="Cybernetic Black Background">BLACK</button>
+            <button type="button" class="bg-mode-btn" id="bgWebcamBtn" title="Live Original Webcam Background">WEBCAM</button>
+          </div>
+          <span class="ink-mirror-stats" id="inkStrokeStats">0 strokes</span>
+        </div>
+        <div class="ink-canvas-frame" id="inkCanvasFrame">
+          <canvas id="leftInkCanvas" width="260" height="230" class="left-ink-canvas"></canvas>
+          <div class="ink-canvas-grid-lines"></div>
+          <div class="ink-crosshair top-left-ch"></div>
+          <div class="ink-crosshair bottom-right-ch"></div>
+        </div>
+      </div>
+
+      <!-- BRUSH STYLES BAR DIRECTLY ON LEFT PANEL (Laser, Stardust, Fire, Ribbon) -->
+      <div class="left-brush-section">
+        <div class="left-brush-header">
+          <span class="left-brush-label">BRUSH FX:</span>
+          <span class="left-brush-status" id="leftBrushStatusText">⚡ LASER</span>
+        </div>
+        <div class="left-brush-grid" id="leftBrushGrid">
+          <button type="button" class="left-brush-btn active" data-style="laser" title="Laser Beam with glowing dual-core">
+            <span class="btn-emoji">⚡</span>
+            <span class="btn-name">Laser</span>
+          </button>
+          <button type="button" class="left-brush-btn" data-style="stardust" title="Cosmic Stardust with shimmering sparkles">
+            <span class="btn-emoji">✨</span>
+            <span class="btn-name">Stardust</span>
+          </button>
+          <button type="button" class="left-brush-btn" data-style="fire" title="Blazing Fire with flame gradient & embers">
+            <span class="btn-emoji">🔥</span>
+            <span class="btn-name">Fire</span>
+          </button>
+          <button type="button" class="left-brush-btn" data-style="ribbon" title="Kinetic Dynamic Ribbon">
+            <span class="btn-emoji">〰️</span>
+            <span class="btn-name">Ribbon</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Action Controls for the Writing Pad -->
+      <div class="left-panel-actions-grid pad-controls">
+        <button class="left-action-btn" id="undoInkBtn" title="Undo Last Stroke">
+          <span>↺</span> Undo
+        </button>
+        <button class="left-action-btn glow-btn" id="saveInkBtn" title="Save / Download Writing">
+          <span>💾</span> Save
+        </button>
+        <button class="left-action-btn danger" id="clearTextBtn" title="Clear Writing">
+          <span>✕</span> Clear
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- BOTTOM GESTURE DOCK -->
+  <footer class="bottom-gesture-dock" id="bottomGestureDock">
+    <div class="gesture-guide-pill" id="cardDraw">
+      <span class="g-dock-icon">☝️</span>
+      <div class="g-dock-info">
+        <span class="g-dock-title">Index Finger</span>
+        <span class="g-dock-desc">Draw / Write</span>
+      </div>
+    </div>
+
+    <div class="gesture-guide-pill" id="cardEraser">
+      <span class="g-dock-icon">✌️</span>
+      <div class="g-dock-info">
+        <span class="g-dock-title">Peace (V)</span>
+        <span class="g-dock-desc">Air Eraser</span>
+      </div>
+    </div>
+
+    <div class="gesture-guide-pill" id="cardHover">
+      <span class="g-dock-icon">🖐️</span>
+      <div class="g-dock-info">
+        <span class="g-dock-title">Open Palm</span>
+        <span class="g-dock-desc">Hover & Aim</span>
+      </div>
+    </div>
+
+    <div class="gesture-guide-pill" id="cardPause">
+      <span class="g-dock-icon">✊</span>
+      <div class="g-dock-info">
+        <span class="g-dock-title">Fist</span>
+        <span class="g-dock-desc">Pause / Hold</span>
+      </div>
+    </div>
+
+    <div class="gesture-guide-pill" id="cardClear">
+      <span class="g-dock-icon">🤙</span>
+      <div class="g-dock-info">
+        <span class="g-dock-title">Shaka / Pinky</span>
+        <span class="g-dock-desc">Clear Canvas</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- MODALS -->
+  <div class="cyber-modal-backdrop hidden" id="guideModal">
+    <div class="cyber-modal">
+      <div class="modal-header">
+        <div class="modal-title-box">
+          <span class="modal-icon">✨</span>
+          <h2>Spatial Air-Drawing Handbook</h2>
+        </div>
+        <button class="modal-close-btn" id="closeGuideBtn">✕</button>
+      </div>
+      <div class="modal-content">
+        <p class="guide-intro">Control <strong>AetherScribe AI</strong> entirely in 3D air using natural hand gestures detected through your webcam:</p>
+        <div class="gestures-grid">
+          <div class="gesture-card highlight">
+            <div class="g-emoji">☝️</div>
+            <div class="g-info">
+              <h3>Air Draw / Paint</h3>
+              <p>Extend your <strong>Index Finger</strong> pointing up. Move your hand to draw neon strokes in the air with dynamic particle trails!</p>
+              <span class="g-tag">Primary Gesture</span>
+            </div>
+          </div>
+          <div class="gesture-card">
+            <div class="g-emoji">🖐️</div>
+            <div class="g-info">
+              <h3>Hover / Move Aim</h3>
+              <p>Open your palm flat. Cursor glides smoothly across the canvas without depositing paint.</p>
+              <span class="g-tag">Navigation</span>
+            </div>
+          </div>
+          <div class="gesture-card">
+            <div class="g-emoji">✌️</div>
+            <div class="g-info">
+              <h3>Spatial Air Eraser</h3>
+              <p>Form a <strong>Peace / V-Sign (Two Fingers)</strong> to erase strokes smoothly in the air.</p>
+              <span class="g-tag">Wipe</span>
+            </div>
+          </div>
+          <div class="gesture-card">
+            <div class="g-emoji">✊</div>
+            <div class="g-info">
+              <h3>Hold / Pause</h3>
+              <p>Close your hand into a <strong>Fist</strong> to freeze the canvas pointer and inspect your artwork.</p>
+              <span class="g-tag">Freeze</span>
+            </div>
+          </div>
+          <div class="gesture-card">
+            <div class="g-emoji">🤙</div>
+            <div class="g-info">
+              <h3>Disintegrate / Clear</h3>
+              <p>Flash a <strong>Shaka / 3-finger</strong> gesture to wipe the entire canvas with a particle burst.</p>
+              <span class="g-tag">Reset</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="pill-btn glow-accent" id="dismissGuideBtn">ENTER STUDIO</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="cyber-modal-backdrop hidden" id="visionModal">
+    <div class="cyber-modal">
+      <div class="modal-header">
+        <div class="modal-title-box">
+          <span class="modal-icon">🧠</span>
+          <h2>AetherScribe AI Vision Studio</h2>
+        </div>
+        <button class="modal-close-btn" id="closeVisionBtn">✕</button>
+      </div>
+      <div class="modal-content">
+        <div class="vision-grid">
+          <div class="vision-preview-col">
+            <div class="preview-frame">
+              <img id="visionSnapshotImg" alt="Air Drawing Snapshot" class="snapshot-img">
+            </div>
+            <div class="vision-meta">
+              <span id="visionStrokesCount">0 strokes</span> • <span id="visionBrushStyle">Laser</span>
+            </div>
+          </div>
+          <div class="vision-results-col">
+            <div class="ai-badge-header">
+              <span class="ai-sparkle">✦</span>
+              <h3 id="visionArtworkTitle">Neural Analysis Loading...</h3>
+            </div>
+            <div class="vision-section">
+              <span class="sec-label">RECOGNIZED CONTENT:</span>
+              <p id="visionRecognized" class="sec-text">Scanning spatial vectors...</p>
+            </div>
+            <div class="vision-section">
+              <span class="sec-label">ARTISTIC CRITIQUE:</span>
+              <p id="visionCritique" class="sec-text">Analyzing stroke energy and luminance...</p>
+            </div>
+            <div class="vision-section">
+              <span class="sec-label">CREATIVE SUGGESTION:</span>
+              <p id="visionSuggestion" class="sec-text">Generating aesthetic direction...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="pill-btn glow-accent" id="saveFromVisionBtn">SAVE TO GALLERY</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="cyber-modal-backdrop hidden" id="galleryModal">
+    <div class="cyber-modal gallery-modal-wide">
+      <div class="modal-header">
+        <div class="modal-title-box">
+          <span class="modal-icon">🖼️</span>
+          <h2>Spatial Air-Art Gallery</h2>
+        </div>
+        <button class="modal-close-btn" id="closeGalleryBtn">✕</button>
+      </div>
+      <div class="modal-content">
+        <div class="gallery-grid" id="galleryGrid"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="pill-btn" id="closeGalleryFooterBtn">CLOSE</button>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
